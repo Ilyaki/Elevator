@@ -6,5 +6,5 @@
   "UniqueID": "Ilyaki.Elevator",
   "EntryDll": "Elevator.dll",
   "MinimumApiVersion": "2.7",
-  "UpdateKeys": []
+  "UpdateKeys": [ "GitHub:Ilyaki/Elevator" ]
 }
