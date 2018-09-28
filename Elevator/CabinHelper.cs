@@ -72,13 +72,14 @@ namespace Elevator
 
 		public static void SpawnElevatorBuilding()
 		{
-			var blueprint = new BluePrint("Shed");
+			var blueprint = new BluePrint("Shed")
+			{
+				daysToConstruct = 0,
+				magical = true,
 
-			blueprint.daysToConstruct = 0;
-			blueprint.magical = true;
-			
-			blueprint.tilesWidth = ModEntry.ElevatorBuildingTexture.Width / 16;
-			
+				tilesWidth = ModEntry.ElevatorBuildingTexture.Width / 16
+			};
+
 			var building = new Building(blueprint, new Vector2(Game1.player.getTileX(), Game1.player.getTileY()));
 
 			//Use this to set it apart from an actual shed (UPDATE: see IsElevatorBuilding instead)
