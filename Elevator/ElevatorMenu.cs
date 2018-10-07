@@ -37,8 +37,8 @@ namespace Elevator
 
 			//If you want the elevator menu to show all cabins (not just the ones off the map), use this instead: players.AddRange(Game1.getAllFarmhands().Where(x => x.Name.Length > 0));
 			players.AddRange(Game1.getAllFarmhands().Where(x => x.Name.Length > 0 && CabinHelper.FindCabinOutside(x)?.tileX.Value <= -10000));
-			
-			players.Sort((a,b) => a == Game1.player ? -2 : a.Name.CompareTo(b.Name));//Sort alphabetically, and put the local player first
+		
+			players = players.OrderBy(x => x != Game1.player).ThenBy(x => x.Name).ToList();//Sort alphabetically, and put the local player first
 
 			UpdateButtonList();
 
