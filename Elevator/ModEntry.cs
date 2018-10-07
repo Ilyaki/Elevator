@@ -6,6 +6,7 @@ using StardewValley.Buildings;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -28,6 +29,8 @@ namespace Elevator
 			helper.ConsoleCommands.Add("elevator_addCabin", "Builds a cabin outside the map for elevator/hotel", this.AddNewCabin);
 			helper.ConsoleCommands.Add("elevator_bringBackCabin", "Moves a cabin to your location, so it will not be used by the elevator. First arg is name of player", this.BringBackCabin);
 			helper.ConsoleCommands.Add("elevator_makeBuildingHere", "Spawn an elevator building on top of you", (o, e) => CabinHelper.SpawnElevatorBuilding());
+			helper.ConsoleCommands.Add("elevator_removeUnusedElevatorCabins", "Remove any empty cabins inside the elevator system.", this.RemoveEmptyElevatorCabins);
+
 
 			//Events
 			StardewModdingAPI.Events.TimeEvents.AfterDayStarted += (o, e) => UpdateWarpsAndReloadTextures();
@@ -214,6 +217,30 @@ namespace Elevator
 			CabinHelper.AddNewCabin();
 			Monitor.Log("Added a new cabin");
 		}
-		
+
+		private void RemoveEmptyElevatorCabins(string command, string[] args)
+		{
+			if (!Game1.IsServer)
+			{
+				Monitor.Log("You must be the server to do that");
+				return;
+			}
+
+			var toRemove = new List<Building>();
+
+			foreach(Cabin cabin in CabinHelper.GetCabinsInsides())
+			{
+				if (cabin.getFarmhand().Value.Name.Length == 0)
+				{
+					toRemove.Add(CabinHelper.FindCabinOutside(cabin.getFarmhand()));
+					
+				}
+			}
+
+			foreach (Building building in toRemove)
+				Game1.getFarm().buildings.Remove(building);
+
+			Monitor.Log($"Removed {toRemove.Count} unused cabins");
+		}
 	}
 }
