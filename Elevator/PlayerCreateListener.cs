@@ -1,4 +1,5 @@
 ﻿using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Network;
 using System;
 
@@ -12,6 +13,19 @@ namespace Elevator
 		{
 			if (f.Value.Name.Length == 0)
 			{
+				//Don't create a cabin unless there is an elevator building
+				bool elevatorBuildingExists = false;
+				foreach (Building building in Game1.getFarm().buildings)
+				{
+					if (CabinHelper.IsElevatorBuilding(building))
+					{
+						elevatorBuildingExists = true;
+						break;
+					}
+				}
+				if (!elevatorBuildingExists)
+					return true;
+
 				//A new player has joined. If there is less then 10 spots availible, mark up until 10
 				int emptyPlaces = 0;
 				foreach (Farmer player in Game1.getAllFarmhands())
