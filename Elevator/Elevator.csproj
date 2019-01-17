@@ -68,7 +68,6 @@
     <Compile Include="BaseTextButton.cs" />
     <Compile Include="BuildingPatcher.cs" />
     <Compile Include="CabinHelper.cs" />
-    <Compile Include="ElevatorBuilding.cs" />
     <Compile Include="ElevatorButton.cs" />
     <Compile Include="ElevatorMenu.cs" />
     <Compile Include="ModEntry.cs" />
