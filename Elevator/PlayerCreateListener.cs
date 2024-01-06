@@ -7,7 +7,6 @@ namespace Elevator
 {
 	class PlayerCreateListener : Patch
 	{
-		protected override PatchDescriptor GetPatchDescriptor() => new PatchDescriptor(typeof(Multiplayer), "addPlayer");
 
 		public static bool Prefix(NetFarmerRoot f)
 		{

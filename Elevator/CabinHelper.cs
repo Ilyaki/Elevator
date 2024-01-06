@@ -58,10 +58,15 @@ namespace Elevator
 		public static void AddNewCabin(int type = 3)
 		{
 			//"Stone Cabin"/"Plank Cabin"/"Log Cabin"
+			Vector2 cabinLocation = new Vector2(-10000, 0);
 			var blueprint = new BluePrint(type == 1 ? "Stone Cabin" : type == 2 ? "Plank Cabin" : "Log Cabin");
-			var building = new Building(blueprint, new Vector2(-10000, 0));
-			Game1.getFarm().buildings.Add(building);
-			
+			var building = new Building(new BluePrint("Log Cabin") 
+			{
+				magical = true
+			}, cabinLocation);
+			building.daysOfConstructionLeft.Value = 0;
+			building.load();
+			Game1.getFarm().buildStructure(building, cabinLocation, Game1.player, skipSafetyChecks: true);
 
 			foreach (var warp in building.indoors.Value.warps)
 			{

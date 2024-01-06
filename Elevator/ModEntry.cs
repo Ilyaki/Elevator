@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Input;
 using Netcode;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Locations;
@@ -11,18 +12,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+
 namespace Elevator
 {
 	class ModEntry : Mod
 	{
 		public static Texture2D ElevatorBuildingTexture { get; private set; }
-
 		public override void Entry(IModHelper helper)
 		{
 			ElevatorBuildingTexture = helper.Content.Load<Texture2D>("Hotel.png");//Must be before PatchAll
 			
 			//Harmony patch everything
-			Patch.PatchAll("me.ilyaki.elevator");
+			Patch.PatchAll(this.ModManifest.UniqueID);
 
 			//Commands
 			helper.ConsoleCommands.Add("elevator_goto", "Warp to cabin. first arg is name of player", this.Goto);
@@ -35,7 +36,6 @@ namespace Elevator
 
 			//Events
 			Helper.Events.GameLoop.DayStarted += (o, e) => UpdateWarpsAndReloadTextures();
-
 
 			Helper.Events.Input.ButtonPressed += (o,e) =>
 			{
@@ -64,7 +64,7 @@ namespace Elevator
 			foreach (Building building in Game1.getFarm().buildings)
 				if (CabinHelper.IsElevatorBuilding(building))
 				{
-					Monitor.Log("(Re)loading an elevator building texture");
+					Monitor.Log("(Re)loading an elevator building texture", LogLevel.Info);
 					building.resetTexture();//Otherwise the clients will just see a shed
 				}
 		}
@@ -86,11 +86,11 @@ namespace Elevator
 			}
 		}
 
-		private void Goto(string command, string[] args)
+		private void Goto(string command = null, string[] args = null)
 		{
 			if (!Context.IsMainPlayer)
 			{
-				Monitor.Log("You must be the server to do that");
+				Monitor.Log("You must be the server to do that", LogLevel.Error);
 				return;
 			}
 
@@ -99,7 +99,7 @@ namespace Elevator
 				return;
 
 			string farmerName = args[0];
-			Monitor.Log($"Attempting to warp to {farmerName}'s house");
+			Monitor.Log($"Attempting to warp to {farmerName}'s house", LogLevel.Info);
 
 			foreach (Farmer player in Game1.getAllFarmers())
 			{
@@ -118,7 +118,7 @@ namespace Elevator
 		{
 			if (!Context.IsMainPlayer)
 			{
-				Monitor.Log("You must be the server to do that");
+				Monitor.Log("You must be the server to do that", LogLevel.Error);
 				return;
 			}
 
@@ -126,13 +126,13 @@ namespace Elevator
 				return;
 
 			string farmerName = args[0];
-			Monitor.Log($"Attempting to move {farmerName}'s house (very) far away");
+			Monitor.Log($"Attempting to move {farmerName}'s house (very) far away", LogLevel.Info);
 
 			foreach (Farmer player in Game1.getAllFarmers())
 			{
 				if (player.Name.ToLower() == farmerName.ToLower())
 				{
-					Monitor.Log($"Found a match: {player.Name}, ID={player.UniqueMultiplayerID}");
+					Monitor.Log($"Found a match: {player.Name}, ID={player.UniqueMultiplayerID}", LogLevel.Info);
 					
 					Building targetBuilding = CabinHelper.FindCabinOutside(player);
 					Cabin cabin = CabinHelper.FindCabinInside(player);
@@ -150,11 +150,11 @@ namespace Elevator
 							warp.TargetY = d.Y;
 						}
 
-						Monitor.Log($"Deleted the house (technically moved it out of bounds)");
+						Monitor.Log($"Deleted the house (technically moved it out of bounds)", LogLevel.Info);
 						return;
 					}else
 					{
-						Monitor.Log("Could not find the cabin");
+						Monitor.Log("Could not find the cabin", LogLevel.Warn);
 					}
 				}
 			}
@@ -164,30 +164,30 @@ namespace Elevator
 		{
 			if (!Context.IsMainPlayer)
 			{
-				Monitor.Log("You must be the server to do that");
+				Monitor.Log("You must be the server to do that", LogLevel.Error);
 				return;
 			}
 
 			if (args.Length < 1)
 			{
-				Monitor.Log("Which player's house?");
+				Monitor.Log("Which player's house?", LogLevel.Warn);
 				return;
 			}
 
 			if (Game1.getFarm() != Game1.player.currentLocation)
 			{
-				Monitor.Log("You need to be on the farm");
+				Monitor.Log("You need to be on the farm", LogLevel.Error);
 				return;
 			}
 
 			string farmerName = args[0];
-			Monitor.Log($"Attempting to move {farmerName}'s house back");
+			Monitor.Log($"Attempting to move {farmerName}'s house back", LogLevel.Info);
 
 			foreach (Farmer player in Game1.getAllFarmers())
 			{
 				if (player.Name.ToLower() == farmerName.ToLower())
 				{
-					Monitor.Log($"Found a match: {player.Name}, ID={player.UniqueMultiplayerID}");
+					Monitor.Log($"Found a match: {player.Name}, ID={player.UniqueMultiplayerID}", LogLevel.Info);
 
 					Building targetBuilding = CabinHelper.FindCabinOutside(player);
 					Cabin cabin = CabinHelper.FindCabinInside(player);
@@ -208,11 +208,11 @@ namespace Elevator
 							warp.TargetY = targetBuilding.humanDoor.Y + (int)targetBuilding.tileY.Value + 1;
 						}
 
-						Monitor.Log($"Moved it");
+						Monitor.Log($"Moved it", LogLevel.Info);
 					}
 					else
 					{
-						Monitor.Log("Could not find the cabin");
+						Monitor.Log("Could not find the cabin", LogLevel.Error);
 					}
 				}
 			}
@@ -222,19 +222,19 @@ namespace Elevator
 		{
 			if (!Context.IsMainPlayer)
 			{
-				Monitor.Log("You must be the server to do that");
+				Monitor.Log("You must be the server to do that", LogLevel.Error);
 				return;
 			}
 
 			CabinHelper.AddNewCabin();
-			Monitor.Log("Added a new cabin");
+			Monitor.Log("Added a new cabin", LogLevel.Info);
 		}
 
 		private void RemoveEmptyElevatorCabins(string command, string[] args)
 		{
 			if (!Context.IsMainPlayer)
 			{
-				Monitor.Log("You must be the server to do that");
+				Monitor.Log("You must be the server to do that", LogLevel.Error);
 				return;
 			}
 
@@ -252,7 +252,7 @@ namespace Elevator
 			foreach (Building building in toRemove)
 				Game1.getFarm().buildings.Remove(building);
 
-			Monitor.Log($"Removed {toRemove.Count} unused cabins");
+			Monitor.Log($"Removed {toRemove.Count} unused cabins", LogLevel.Info);
 		}
 	}
 }
