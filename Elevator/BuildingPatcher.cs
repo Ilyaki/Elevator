@@ -9,7 +9,6 @@ namespace Elevator
 {
 	class BuildingPatcher_patchAction : Patch
 	{
-		protected override PatchDescriptor GetPatchDescriptor() => new PatchDescriptor(typeof(Building), "doAction");
 
 		public static bool Prefix(Vector2 tileLocation, Farmer who, NetPoint ___humanDoor, NetInt ___tileX, NetInt ___tileY, Building __instance)
 		{
@@ -47,7 +46,6 @@ namespace Elevator
 
 	class BuildingPatcher_patchResetTexture : Patch
 	{
-		protected override PatchDescriptor GetPatchDescriptor() => new PatchDescriptor(typeof(Building), "resetTexture");
 
 		public static bool Prefix(Building __instance)
 		{
@@ -63,7 +61,6 @@ namespace Elevator
 	//This makes it so when you hover over the double doors it still makes your mouse have the hover icon/hand thing
 	class BuildingPatcher_patchIsActionableTile : Patch
 	{
-		protected override PatchDescriptor GetPatchDescriptor() => new PatchDescriptor(typeof(Building), "isActionableTile");
 		
 		public static bool Postfix(bool b, int xTile, int yTile, Farmer who, Building __instance, NetPoint ___humanDoor, bool __result, NetInt ___tileX, NetInt ___tileY)
 		{

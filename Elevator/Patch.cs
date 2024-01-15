@@ -1,4 +1,6 @@
-﻿using Harmony;
+﻿using HarmonyLib;
+using StardewValley;
+using StardewValley.Buildings;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -7,7 +9,6 @@ namespace Elevator
 {
 	abstract class Patch
 	{
-		protected abstract PatchDescriptor GetPatchDescriptor();
 
 		//Remember Prefix/Postfix should be public and static! Do not use lambdas
 
@@ -27,32 +28,13 @@ namespace Elevator
 				this.targetMethodArguments = targetMethodArguments;
 			}
 		}
-
-
-		private void ApplyPatch(HarmonyInstance harmonyInstance)
-		{
-			var patchDescriptor = GetPatchDescriptor();
-
-			MethodBase targetMethod = String.IsNullOrEmpty(patchDescriptor.targetMethodName) ?
-
-				(MethodBase)patchDescriptor.targetType.GetConstructor(patchDescriptor.targetMethodArguments ?? new Type[0]) :
-
-				targetMethod = patchDescriptor.targetMethodArguments != null ?
-					patchDescriptor.targetType.GetMethod(patchDescriptor.targetMethodName, patchDescriptor.targetMethodArguments)
-					: patchDescriptor.targetType.GetMethod(patchDescriptor.targetMethodName, ((BindingFlags)62));
-
-			harmonyInstance.Patch(targetMethod, new HarmonyMethod(GetType().GetMethod("Prefix")), new HarmonyMethod(GetType().GetMethod("Postfix")));
-		}
-
 		public static void PatchAll(string id)
 		{
-			HarmonyInstance harmonyInstance = HarmonyInstance.Create(id);
-
-			foreach (Type type in (from type in Assembly.GetExecutingAssembly().GetTypes()
-								   where type.IsClass && type.BaseType == typeof(Patch)
-								   select type))
-				((Patch)Activator.CreateInstance(type)).ApplyPatch(harmonyInstance);
-
+			Harmony harmonyInstance = new Harmony(id);
+			harmonyInstance.Patch(original: AccessTools.Method(typeof(Building), nameof(Building.doAction)), prefix: new HarmonyMethod(typeof(BuildingPatcher_patchAction), nameof(BuildingPatcher_patchAction.Prefix)));
+			harmonyInstance.Patch(original: AccessTools.Method(typeof(Building), nameof(Building.isActionableTile)), postfix: new HarmonyMethod(typeof(BuildingPatcher_patchIsActionableTile), nameof(BuildingPatcher_patchIsActionableTile.Postfix)));
+			harmonyInstance.Patch(original: AccessTools.Method(typeof(Building), nameof(Building.resetTexture)), prefix: new HarmonyMethod(typeof(BuildingPatcher_patchResetTexture), nameof(BuildingPatcher_patchResetTexture.Prefix)));
+			harmonyInstance.Patch(original: AccessTools.Method(typeof(Multiplayer), nameof(Multiplayer.addPlayer)), prefix: new HarmonyMethod(typeof(PlayerCreateListener), nameof(PlayerCreateListener.Prefix)));
 		}
 	}
 }
